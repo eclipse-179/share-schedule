@@ -1,0 +1,3102 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Share Schedule</title>
+  <!-- Open Graph / 카카오톡·슬랙 공유 썸네일 메타 태그 -->
+  <meta name="description" content="누구나 링크 하나로 일정을 등록하고 공유하는 하이엔드 캘린더, Share Schedule">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Share Schedule — 함께 쓰는 일정 공유 캘린더">
+  <meta property="og:description" content="별도 로그인 없이 링크 하나로 팀 일정과 휴가 현황을 한눈에 공유해보세요.">
+  <meta property="og:image" content="https://placehold.co/1200x630/FACC15/1F2937.png?text=Share+Schedule">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Share Schedule — 함께 쓰는 일정 공유 캘린더">
+  <meta name="twitter:description" content="별도 로그인 없이 링크 하나로 팀 일정과 휴가 현황을 한눈에 공유해보세요.">
+  <meta name="twitter:image" content="https://placehold.co/1200x630/FACC15/1F2937.png?text=Share+Schedule">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%23FACC15'/><text x='50%' y='55%' dominant-baseline='central' text-anchor='middle' font-size='60'>🧈</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+  <style>
+    :root {
+      /* [1] 화사한 버터 옐로우 & 하이엔드 컬러 시스템 */
+      --bg-page: #fffbeb;              /* 전체 배경: 따스하고 화사한 옅은 크림 노랑 */
+      --bg-surface: #ffffff;           /* 카드 표면: 순백색 플로팅 블록 */
+      --bg-vanilla: #fffdf5;           /* 사이드바 빈 상태 박스용 따뜻한 바닐라/상아색 */
+      --bg-vanilla-deep: #fef9e7;      /* 바닐라 소프트 틴트 */
+      --bg-solid-control: #f4f4f0;     /* 비활성 컨트롤/보조 버튼용 웜 그레이 솔리드 */
+      --bg-solid-control-hover: #eaeae4;
+      --bg-butter-soft: #fef08a;       /* 부드러운 버터 크림 액센트 */
+
+      /* 메인 액센트: 쨍한 버터 옐로우 & 다크 차콜 대비 */
+      --primary: #facc15;
+      --primary-hover: #eab308;
+      --primary-text: #1f2937;
+
+      /* 선을 최소화한 내부 미세 가이드라인 */
+      --grid-line: #f5f2e8;
+
+      /* 가독성을 극대화한 다크 차콜 타이포그래피 */
+      --text-main: #1f2937;            /* 주요 타이틀/날짜/강조: 다크 차콜 */
+      --text-body: #4b5563;            /* 본문 텍스트 */
+      --text-muted: #6b7280;           /* 보조 캡션 텍스트 */
+      --text-faint: #9ca3af;
+
+      /* 요일 / 공휴일 포인트 */
+      --holiday: #ef4444;
+      --holiday-bg: #fff1f2;
+      --saturday: #3b82f6;
+
+      /* [2] 선(Border)을 없앤 토스/애플 스타일 소프트 그림자 */
+      --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.03);
+      --shadow-card-hover: 0 14px 36px rgba(0, 0, 0, 0.05);
+      --shadow-primary: 0 6px 18px rgba(250, 204, 21, 0.32);
+      --shadow-modal: 0 24px 60px rgba(0, 0, 0, 0.10);
+      --shadow-toast: 0 16px 40px rgba(31, 41, 55, 0.22);
+
+      /* 라운드 곡률 */
+      --radius-pill: 9999px;
+      --radius-card: 24px;
+      --radius-lg: 16px;
+      --radius-md: 12px;
+      --radius-sm: 8px;
+
+      /* [3] 마이크로 애니메이션 이징 */
+      --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+      --font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: var(--font-family);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* [4] 커스텀 웹킷 스크롤바 (연노랑/웜그레이 톤의 얇고 둥근 스크롤바) */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #e6e1cc;
+      border-radius: var(--radius-pill);
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #facc15;
+    }
+
+    html {
+      font-size: 16px; /* 기본 폰트 크기 16px로 시원하게 확대 */
+    }
+
+    body {
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      font-size: 1rem;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      line-height: 1.55;
+    }
+
+    /* 읽기 전용 알림 상단 바 */
+    .readonly-banner {
+      display: none;
+      background: var(--primary);
+      color: var(--primary-text);
+      padding: 12px 24px;
+      text-align: center;
+      font-size: 0.92rem;
+      font-weight: 700;
+      border: none;
+      animation: bannerSlideDown 0.35s var(--ease-spring);
+    }
+
+    .readonly-banner.active {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    @keyframes bannerSlideDown {
+      from { transform: translateY(-100%); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    /* 상단 헤더 & 내비게이션 (외곽선 제거, 1.5배 여유로운 여백) */
+    header {
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: none;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.025);
+    }
+
+    .header-container {
+      max-width: 1560px;
+      margin: 0 auto;
+      padding: 20px 42px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-logo {
+      width: 42px;
+      height: 42px;
+      background: var(--primary);
+      border-radius: 13px;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.35rem;
+      box-shadow: 0 4px 12px rgba(250, 204, 21, 0.3);
+      transition: transform 0.2s var(--ease-spring);
+    }
+
+    .brand-logo:hover {
+      transform: translateY(-2px) scale(1.04);
+    }
+
+    .brand-info h1 {
+      font-size: 1.3rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* 뷰 전환 탭 그룹 (월간 | 주간 | 일간) - 활성 탭 쨍한 버터 옐로우(#FACC15) + 다크 차콜(#1F2937) */
+    .view-toggle-group {
+      display: flex;
+      background: var(--bg-solid-control);
+      padding: 5px;
+      border-radius: 14px;
+      border: none;
+      gap: 4px;
+    }
+
+    .view-tab-btn {
+      padding: 9px 22px;
+      border: none;
+      background: transparent;
+      color: var(--text-body);
+      font-size: 0.94rem;
+      font-weight: 600;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s var(--ease-spring);
+    }
+
+    .view-tab-btn:hover {
+      color: var(--text-main);
+      background: rgba(0, 0, 0, 0.04);
+    }
+
+    .view-tab-btn.active {
+      background: var(--primary);
+      color: var(--primary-text);
+      font-weight: 700;
+      box-shadow: 0 3px 10px rgba(250, 204, 21, 0.3);
+    }
+
+    .view-tab-btn:active {
+      transform: scale(0.96);
+    }
+
+    /* 달력 컨트롤러 (이전/다음, 날짜 텍스트, 오늘) */
+    .nav-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: transparent;
+      padding: 0;
+      border: none;
+    }
+
+    .current-date-display {
+      font-size: 1.2rem;
+      font-weight: 700;
+      padding: 0 14px;
+      min-width: 165px;
+      text-align: center;
+      letter-spacing: -0.02em;
+      color: var(--text-main);
+      white-space: nowrap;
+    }
+
+    .btn-icon {
+      background: var(--bg-solid-control);
+      border: none;
+      outline: none;
+      cursor: pointer;
+      width: 38px;
+      height: 38px;
+      border-radius: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-main);
+      transition: all 0.18s var(--ease-spring);
+    }
+
+    .btn-icon:hover {
+      background: var(--bg-solid-control-hover);
+      transform: translateY(-2px);
+    }
+
+    .btn-icon:active {
+      transform: scale(0.94);
+    }
+
+    .btn-today {
+      background: var(--bg-solid-control);
+      border: none;
+      font-size: 0.9rem;
+      font-weight: 600;
+      padding: 9px 18px;
+      border-radius: 11px;
+      cursor: pointer;
+      transition: all 0.18s var(--ease-spring);
+      color: var(--text-main);
+      margin-left: 4px;
+    }
+
+    .btn-today:hover {
+      background: var(--bg-solid-control-hover);
+      transform: translateY(-2px);
+    }
+
+    .btn-today:active {
+      transform: scale(0.96);
+    }
+
+    /* 상단 액션 버튼 그룹 (테두리 완전 제거 & 솔리드 면 디자인) */
+    .actions-section {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 20px;
+      border-radius: 13px;
+      font-size: 0.93rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s var(--ease-spring);
+      border: none !important;
+      outline: none;
+      user-select: none;
+      white-space: nowrap;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .btn:active {
+      transform: scale(0.97) !important;
+    }
+
+    .btn-secondary {
+      background: var(--bg-solid-control);
+      color: var(--text-main);
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg-solid-control-hover);
+    }
+
+    .btn-share {
+      background: #fef08a;
+      color: var(--primary-text);
+      font-weight: 700;
+    }
+
+    .btn-share:hover {
+      background: #fde047;
+    }
+
+    .btn-readonly-share {
+      background: var(--bg-solid-control);
+      color: var(--text-main);
+    }
+
+    .btn-readonly-share:hover {
+      background: var(--bg-solid-control-hover);
+    }
+
+    /* 메인 버튼 (+ 새 일정 등록): 쨍한 버터 옐로우(#FACC15) + 다크 차콜(#1F2937) */
+    .btn-primary {
+      background: var(--primary);
+      color: var(--primary-text);
+      font-weight: 700;
+      box-shadow: var(--shadow-primary);
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-hover);
+      box-shadow: 0 10px 24px rgba(250, 204, 21, 0.4);
+    }
+
+    .btn-danger {
+      background: #fff1f2;
+      color: #e11d48;
+      font-weight: 700;
+    }
+
+    .btn-danger:hover {
+      background: #ffe4e6;
+    }
+
+    /* 메인 컨텐츠 레이아웃 (여백 1.5배 확장으로 여유로운 공간감) */
+    main {
+      flex: 1;
+      max-width: 1560px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 38px 42px 60px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .main-content-layout {
+      display: flex;
+      gap: 34px;
+      align-items: stretch;
+      flex: 1;
+      width: 100%;
+    }
+
+    /* 달력 본체 카드: 순백색(#FFFFFF) + 선 없음 + 소프트 섀도우 */
+    .calendar-card {
+      background: var(--bg-surface);
+      border-radius: var(--radius-card);
+      border: none;
+      box-shadow: var(--shadow-card);
+      padding: 20px 24px 28px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      flex: 1 1 70%;
+      min-width: 0;
+    }
+
+    /* 우측 일정 브리핑 사이드바 */
+    .schedule-sidebar {
+      flex: 0 0 380px;
+      width: 380px;
+      display: flex;
+      flex-direction: column;
+      gap: 26px;
+    }
+
+    .sidebar-card,
+    .sidebar-card.today-card,
+    .sidebar-card.vacation-card {
+      background: var(--bg-surface);
+      border-radius: var(--radius-card);
+      border: none !important;
+      box-shadow: var(--shadow-card);
+      padding: 30px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      transition: transform 0.22s var(--ease-spring), box-shadow 0.22s var(--ease-spring);
+    }
+
+    .sidebar-card:hover {
+      box-shadow: var(--shadow-card-hover);
+    }
+
+    .sidebar-sub-section {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .sidebar-sub-title {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text-body);
+      letter-spacing: -0.01em;
+    }
+
+    .vacation-chips-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .vacation-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 15px;
+      background: #fff1f2;
+      border: none;
+      border-radius: 12px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: #881337;
+      cursor: pointer;
+      transition: transform 0.2s var(--ease-spring), background-color 0.2s ease;
+    }
+
+    .vacation-chip:hover {
+      background: #ffe4e6;
+      transform: translateY(-2px);
+    }
+
+    .vacation-chip:active {
+      transform: scale(0.97);
+    }
+
+    .vacation-type-tag {
+      font-size: 0.75rem;
+      background: #ffffff;
+      color: #be123c;
+      padding: 2px 9px;
+      border-radius: 7px;
+      font-weight: 700;
+    }
+
+    /* 휴가 일정 전용 솔리드 스타일 */
+    .event-pill.is-vacation {
+      background: #fff1f2 !important;
+      color: #9f1239 !important;
+      border: none !important;
+      font-weight: 600 !important;
+      box-shadow: none !important;
+    }
+
+    .week-event-card.is-vacation,
+    .day-timeline-card.is-vacation,
+    .sidebar-item-card.is-vacation {
+      background: #fff1f2 !important;
+      color: #881337 !important;
+      border: none !important;
+    }
+
+    .sidebar-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .sidebar-badge-today {
+      background: var(--primary);
+      color: var(--primary-text);
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 5px 12px;
+      border-radius: var(--radius-pill);
+      letter-spacing: 0.03em;
+    }
+
+    .sidebar-today-date {
+      font-size: 1.18rem;
+      font-weight: 700;
+      color: var(--text-main);
+      letter-spacing: -0.02em;
+    }
+
+    .sidebar-section-title {
+      font-size: 1.12rem;
+      font-weight: 700;
+      color: var(--text-main) !important;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .sidebar-count-badge {
+      background: var(--bg-vanilla-deep) !important;
+      color: var(--text-main) !important;
+      font-size: 0.82rem;
+      font-weight: 700;
+      padding: 5px 12px;
+      border-radius: var(--radius-pill);
+      border: none !important;
+    }
+
+    .sidebar-events-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 320px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    /* 사이드바 내부 일정 카드 (마우스 호버 시 translateY(-2px)) */
+    .sidebar-item-card {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 16px 18px;
+      border-radius: 15px;
+      border: none !important;
+      cursor: pointer;
+      transition: transform 0.2s var(--ease-spring), filter 0.2s ease;
+      background: var(--bg-vanilla);
+    }
+
+    .sidebar-item-card:hover {
+      transform: translateY(-2px);
+      filter: brightness(0.98);
+    }
+
+    .sidebar-item-card:active {
+      transform: scale(0.98);
+    }
+
+    .sidebar-item-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .sidebar-item-title {
+      font-size: 0.96rem;
+      font-weight: 700;
+      color: var(--text-main) !important;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .sidebar-item-date-badge {
+      font-size: 0.76rem;
+      font-weight: 600;
+      color: var(--text-main) !important;
+      background: rgba(255, 255, 255, 0.8) !important;
+      border: none !important;
+      padding: 3px 9px;
+      border-radius: 7px;
+      white-space: nowrap;
+    }
+
+    .sidebar-item-time {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-body);
+      background: rgba(255, 255, 255, 0.75);
+      padding: 3px 9px;
+      border-radius: 7px;
+      white-space: nowrap;
+    }
+
+    .sidebar-item-memo {
+      font-size: 0.85rem;
+      color: var(--text-body);
+      opacity: 0.9;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* 우측 사이드바 빈 상태 박스: 점선 제거 + 따뜻한 옅은 바닐라/상아색(#FFFDF5) */
+    .sidebar-empty-box {
+      text-align: center;
+      padding: 36px 22px;
+      color: var(--text-muted);
+      font-size: 0.92rem;
+      font-weight: 500;
+      background: var(--bg-vanilla);
+      border: none;
+      border-radius: var(--radius-lg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* 공휴일 뱃지 및 스타일 */
+    .day-num-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .day-cell.is-holiday .day-number {
+      color: var(--holiday) !important;
+    }
+
+    .holiday-badge {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--holiday);
+      background: var(--holiday-bg);
+      border: none;
+      padding: 2px 7px;
+      border-radius: 6px;
+      line-height: 1.3;
+      white-space: nowrap;
+      max-width: 78px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .week-column.is-holiday .week-day-name,
+    .week-column.is-holiday .week-day-badge {
+      color: var(--holiday) !important;
+    }
+
+    .week-holiday-badge {
+      font-size: 0.74rem;
+      font-weight: 600;
+      color: var(--holiday);
+      background: var(--holiday-bg);
+      border: none;
+      padding: 2px 8px;
+      border-radius: 6px;
+      margin-top: 2px;
+      white-space: nowrap;
+    }
+
+    .day-holiday-badge {
+      font-size: 0.86rem;
+      font-weight: 600;
+      color: var(--holiday);
+      background: var(--holiday-bg);
+      border: none;
+      padding: 4px 11px;
+      border-radius: var(--radius-sm);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* =========================================================
+       1) 월간 뷰 (Month View) - 진한 선 제거 & 원형 Today 뱃지
+       ========================================================= */
+    .weekday-header {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      border-bottom: 1px solid var(--grid-line);
+      background: var(--bg-surface);
+    }
+
+    .weekday {
+      padding: 16px 10px;
+      text-align: center;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-body);
+      letter-spacing: 0.02em;
+    }
+
+    .weekday.sun { color: var(--holiday); }
+    .weekday.sat { color: var(--saturday); }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      grid-auto-rows: minmax(134px, 1fr);
+      flex: 1;
+    }
+
+    .day-cell {
+      border-right: 1px solid var(--grid-line);
+      border-bottom: 1px solid var(--grid-line);
+      padding: 14px 12px;
+      position: relative;
+      cursor: pointer;
+      transition: background-color 0.18s ease;
+      display: flex;
+      flex-direction: column;
+      min-height: 130px;
+      background: var(--bg-surface);
+    }
+
+    .day-cell:nth-child(7n) {
+      border-right: none;
+    }
+
+    .day-cell:hover {
+      background-color: var(--bg-vanilla);
+    }
+
+    .day-cell.other-month {
+      background-color: var(--bg-surface);
+      opacity: 0.35;
+    }
+
+    .day-cell.other-month:hover {
+      background-color: var(--bg-vanilla);
+      opacity: 0.65;
+    }
+
+    .day-cell.today {
+      background-color: var(--bg-surface);
+    }
+
+    .day-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      padding: 0 2px;
+    }
+
+    /* 날짜 숫자 & 오늘 날짜(Today): 완벽한 원형(border-radius: 50%) 및 정중앙 정렬 */
+    .day-number {
+      font-size: 0.94rem;
+      font-weight: 600;
+      width: 30px;
+      height: 30px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      border-radius: 50%;
+      color: var(--text-main);
+      transition: all 0.18s var(--ease-spring);
+    }
+
+    .day-cell.is-sun .day-number { color: var(--holiday); }
+    .day-cell.is-sat .day-number { color: var(--saturday); }
+
+    .day-cell.today .day-number {
+      background: var(--primary);
+      color: var(--primary-text) !important;
+      font-weight: 700;
+      border-radius: 50%;
+      box-shadow: 0 3px 10px rgba(250, 204, 21, 0.35);
+    }
+
+    .cell-add-btn {
+      opacity: 0;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: none;
+      background: var(--bg-solid-control);
+      color: var(--text-main);
+      font-size: 15px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.18s var(--ease-spring);
+    }
+
+    .day-cell:hover .cell-add-btn {
+      opacity: 1;
+    }
+
+    .cell-add-btn:hover {
+      background: var(--primary);
+      color: var(--primary-text);
+      transform: translateY(-2px);
+    }
+
+    .cell-add-btn:active {
+      transform: scale(0.92);
+    }
+
+    /* 일정 태그 블록 (마우스 호버 시 살짝 떠오르는 translateY(-2px) 효과) */
+    .events-container {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      overflow-y: auto;
+      max-height: 135px;
+      padding: 2px 1px;
+    }
+
+    .event-pill {
+      font-size: 0.83rem;
+      padding: 6px 10px;
+      border-radius: 9px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      transition: transform 0.2s var(--ease-spring), filter 0.2s ease, box-shadow 0.2s ease;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      border: none !important;
+      box-shadow: none;
+    }
+
+    .event-pill:hover {
+      transform: translateY(-2px);
+      filter: brightness(0.97);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .event-pill:active {
+      transform: scale(0.98);
+    }
+
+    .event-time {
+      font-size: 0.74rem;
+      font-weight: 600;
+      color: var(--text-main);
+      flex-shrink: 0;
+      background: rgba(255, 255, 255, 0.7);
+      padding: 1px 6px;
+      border-radius: 5px;
+      letter-spacing: -0.01em;
+    }
+
+    .event-title {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* =========================================================
+       2) 주간 뷰 (Week View)
+       ========================================================= */
+    .week-view-container {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      flex: 1;
+      min-height: 580px;
+    }
+
+    .week-column {
+      border-right: 1px solid var(--grid-line);
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-surface);
+      transition: background-color 0.18s ease;
+    }
+
+    .week-column:last-child {
+      border-right: none;
+    }
+
+    .week-column:hover {
+      background: var(--bg-vanilla);
+    }
+
+    .week-column-header {
+      padding: 20px 10px;
+      text-align: center;
+      border-bottom: 1px solid var(--grid-line);
+      background: var(--bg-surface);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .week-day-name {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text-body);
+    }
+
+    .week-day-name.sun { color: var(--holiday); }
+    .week-day-name.sat { color: var(--saturday); }
+
+    .week-day-badge {
+      font-size: 1rem;
+      font-weight: 700;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      color: var(--text-main);
+    }
+
+    .week-column.today .week-day-badge {
+      background: var(--primary);
+      color: var(--primary-text);
+      font-weight: 700;
+      border-radius: 50%;
+      box-shadow: 0 3px 10px rgba(250, 204, 21, 0.35);
+    }
+
+    .week-column-body {
+      flex: 1;
+      padding: 16px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      overflow-y: auto;
+    }
+
+    .week-event-card {
+      padding: 14px 15px;
+      border-radius: 14px;
+      border: none !important;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      cursor: pointer;
+      transition: transform 0.2s var(--ease-spring), filter 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .week-event-card:hover {
+      transform: translateY(-2px);
+      filter: brightness(0.97);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.05);
+    }
+
+    .week-event-card:active {
+      transform: scale(0.98);
+    }
+
+    .week-event-card .card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 4px;
+    }
+
+    .week-event-card .card-time {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-body);
+    }
+
+    .week-event-card .card-title {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1.4;
+      word-break: break-all;
+    }
+
+    .week-event-card .card-memo {
+      font-size: 0.82rem;
+      color: var(--text-body);
+      opacity: 0.9;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+
+    .week-add-prompt {
+      margin-top: auto;
+      padding: 11px;
+      text-align: center;
+      border: none;
+      border-radius: 12px;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      background: var(--bg-vanilla);
+      transition: all 0.18s var(--ease-spring);
+    }
+
+    .week-add-prompt:hover {
+      background: var(--bg-butter-soft);
+      color: var(--primary-text);
+      transform: translateY(-2px);
+    }
+
+    /* =========================================================
+       3) 일간 뷰 (Day View)
+       ========================================================= */
+    .day-view-container {
+      display: flex;
+      flex-direction: column;
+      padding: 24px 18px;
+      gap: 24px;
+      flex: 1;
+      background: var(--bg-surface);
+    }
+
+    .day-banner-card {
+      background: var(--bg-vanilla);
+      border: none;
+      border-radius: 20px;
+      padding: 28px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .day-banner-title {
+      font-size: 1.45rem;
+      font-weight: 800;
+      color: var(--text-main);
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .day-banner-desc {
+      font-size: 0.94rem;
+      color: var(--text-body);
+      margin-top: 6px;
+      font-weight: 500;
+    }
+
+    .day-timeline-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      flex: 1;
+    }
+
+    .day-timeline-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 20px;
+      padding: 22px 26px;
+      border-radius: 18px;
+      border: none !important;
+      cursor: pointer;
+      transition: transform 0.2s var(--ease-spring), filter 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .day-timeline-card:hover {
+      transform: translateY(-2px);
+      filter: brightness(0.98);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    .day-card-time {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-main);
+      min-width: 95px;
+      padding-right: 16px;
+      border-right: 1px solid rgba(0, 0, 0, 0.06);
+    }
+
+    .day-card-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .day-card-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .day-card-memo {
+      font-size: 0.94rem;
+      color: var(--text-body);
+      line-height: 1.55;
+      white-space: pre-wrap;
+    }
+
+    .day-empty-state {
+      text-align: center;
+      padding: 72px 24px;
+      background: var(--bg-vanilla);
+      border: none;
+      border-radius: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .day-empty-state .empty-icon {
+      font-size: 2.5rem;
+    }
+
+    .day-empty-state p {
+      color: var(--text-muted);
+      font-size: 0.98rem;
+      font-weight: 500;
+    }
+
+    /* 정제된 파스텔 솔리드 컬러 팔레트 (다크 차콜 텍스트와 조화) */
+    .color-butter { background: #fef08a; color: #1f2937; }
+    .color-peach { background: #ffedd5; color: #1f2937; }
+    .color-rose { background: #ffe4e6; color: #1f2937; }
+    .color-sage { background: #dcfce7; color: #1f2937; }
+    .color-sky { background: #e0f2fe; color: #1f2937; }
+    .color-lavender { background: #f3e8ff; color: #1f2937; }
+    .color-latte { background: #f3f4f6; color: #1f2937; }
+
+    /* [3] 모달 팝업 (부드러운 scale/fade 마이크로 애니메이션) */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(31, 41, 55, 0.42);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 0.26s var(--ease-spring), visibility 0.26s var(--ease-spring);
+    }
+
+    .modal-backdrop.active {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+
+    .modal {
+      background: var(--bg-surface);
+      border-radius: 26px;
+      width: 100%;
+      max-width: 520px;
+      box-shadow: var(--shadow-modal);
+      border: none;
+      overflow: hidden;
+      opacity: 0;
+      transform: scale(0.94) translateY(14px);
+      transition: transform 0.28s var(--ease-spring), opacity 0.24s var(--ease-spring);
+    }
+
+    .modal-backdrop.active .modal {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+
+    .modal-header {
+      padding: 28px 32px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--grid-line);
+      background: var(--bg-surface);
+    }
+
+    .modal-title {
+      font-size: 1.24rem;
+      font-weight: 800;
+      color: var(--text-main);
+      letter-spacing: -0.02em;
+    }
+
+    .modal-close {
+      background: var(--bg-solid-control);
+      border: none;
+      color: var(--text-main);
+      cursor: pointer;
+      font-size: 1.3rem;
+      line-height: 1;
+      border-radius: 50%;
+      width: 34px;
+      height: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.18s var(--ease-spring);
+    }
+
+    .modal-close:hover {
+      background: var(--bg-solid-control-hover);
+      transform: scale(1.06);
+    }
+
+    .modal-body {
+      padding: 28px 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* 모달 내 일정/휴가 분류 탭 버튼 그룹 (활성 탭 버터 옐로우) */
+    .modal-tab-group {
+      display: flex;
+      background: var(--bg-solid-control);
+      border: none;
+      border-radius: 14px;
+      padding: 5px;
+      gap: 4px;
+    }
+
+    .modal-tab-btn {
+      flex: 1;
+      padding: 11px 16px;
+      border: none;
+      background: transparent;
+      border-radius: 10px;
+      font-size: 0.94rem;
+      font-weight: 600;
+      color: var(--text-body);
+      cursor: pointer;
+      transition: all 0.2s var(--ease-spring);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .modal-tab-btn:hover {
+      color: var(--text-main);
+    }
+
+    .modal-tab-btn.active {
+      background: var(--primary);
+      color: var(--primary-text);
+      box-shadow: 0 3px 10px rgba(250, 204, 21, 0.3);
+      font-weight: 700;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .form-label {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    /* 테두리 없는 솔리드 폼 인풋 */
+    .form-input, .form-textarea {
+      width: 100%;
+      padding: 14px 16px;
+      border: 1.5px solid transparent;
+      border-radius: 13px;
+      font-size: 0.96rem;
+      color: var(--text-main);
+      background: var(--bg-solid-control);
+      transition: all 0.18s var(--ease-spring);
+    }
+
+    .form-input:focus, .form-textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: var(--bg-surface);
+      box-shadow: 0 0 0 3.5px rgba(250, 204, 21, 0.28);
+    }
+
+    .form-textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    /* 색상 라디오 팔레트 */
+    .color-picker {
+      display: flex;
+      gap: 12px;
+      margin-top: 4px;
+      flex-wrap: wrap;
+    }
+
+    .color-option {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      cursor: pointer;
+      position: relative;
+      border: 2px solid transparent;
+      transition: transform 0.18s var(--ease-spring), box-shadow 0.18s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .color-option:hover {
+      transform: translateY(-2px) scale(1.1);
+    }
+
+    .color-option.selected {
+      border-color: var(--text-main);
+      box-shadow: 0 0 0 2px white inset;
+      transform: scale(1.08);
+    }
+
+    .modal-footer {
+      padding: 20px 32px 28px;
+      background: var(--bg-surface);
+      border-top: 1px solid var(--grid-line);
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    /* [3] 다크 그레이 토스트(Toast) 알림창: 하단에서 스르륵 떠올랐다 사라지는 애니메이션 */
+    .toast-container {
+      position: fixed;
+      bottom: 34px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      z-index: 300;
+      pointer-events: none;
+    }
+
+    .toast {
+      background: rgba(31, 41, 55, 0.95);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      color: #ffffff;
+      border: none;
+      padding: 14px 26px;
+      border-radius: var(--radius-pill);
+      font-size: 0.94rem;
+      font-weight: 600;
+      box-shadow: var(--shadow-toast);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      white-space: nowrap;
+      animation: toastSlideUp 0.32s var(--ease-spring) forwards, toastFadeOut 0.3s 3.1s var(--ease-spring) forwards;
+    }
+
+    @keyframes toastSlideUp {
+      from { opacity: 0; transform: translateY(24px) scale(0.95); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    @keyframes toastFadeOut {
+      from { opacity: 1; transform: translateY(0) scale(1); }
+      to { opacity: 0; transform: translateY(16px) scale(0.96); }
+    }
+
+    /* 읽기 전용 상태일 때의 UI 제어 */
+    body.is-readonly .hide-on-readonly {
+      display: none !important;
+    }
+
+    body.is-readonly .cell-add-btn,
+    body.is-readonly .week-add-prompt {
+      display: none !important;
+    }
+
+    /* 반응형 스타일 */
+    @media (max-width: 1140px) {
+      .main-content-layout {
+        flex-direction: column;
+      }
+      .calendar-card {
+        width: 100%;
+        flex: none;
+      }
+      .schedule-sidebar {
+        width: 100%;
+        flex: none;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .header-container {
+        padding: 16px 20px;
+      }
+      .actions-section {
+        width: 100%;
+        justify-content: flex-end;
+      }
+      main {
+        padding: 20px 16px 36px;
+      }
+      .current-date-display {
+        font-size: 1.05rem;
+        min-width: 130px;
+      }
+      .calendar-grid {
+        grid-auto-rows: minmax(94px, 1fr);
+      }
+      .day-cell {
+        min-height: 94px;
+        padding: 8px 6px;
+      }
+      .event-time {
+        display: none;
+      }
+      .week-view-container {
+        overflow-x: auto;
+      }
+      .week-column {
+        min-width: 130px;
+      }
+    }
+
+    /* 터치 제스처 최적화 */
+    .calendar-card {
+      touch-action: pan-y;
+      user-select: none;
+    }
+
+    /* =========================================================
+       인쇄 및 PDF 출력 전용 스타일 (@media print)
+       ========================================================= */
+    .print-only-header {
+      display: none;
+    }
+
+    @media print {
+      @page {
+        size: A4 landscape;
+        margin: 8mm 10mm;
+      }
+
+      body {
+        background: #ffffff !important;
+        color: #1f2937 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      header,
+      .readonly-banner,
+      .modal-backdrop,
+      .toast-container,
+      .cell-add-btn,
+      .week-add-prompt,
+      .schedule-sidebar,
+      .hide-on-print,
+      .btn {
+        display: none !important;
+      }
+
+      .main-content-layout {
+        display: block !important;
+      }
+
+      main {
+        padding: 0 !important;
+        max-width: 100% !important;
+        width: 100% !important;
+      }
+
+      .print-only-header {
+        display: flex !important;
+        align-items: center;
+        justify-content: space-between;
+        padding-bottom: 10px;
+        margin-bottom: 12px;
+        border-bottom: 1.5px solid #1f2937;
+      }
+
+      .print-brand {
+        font-size: 1.35rem;
+        font-weight: 800;
+        color: #1f2937;
+      }
+
+      .print-date {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #4b5563;
+      }
+
+      .calendar-card {
+        border: 1px solid #e5e7eb !important;
+        border-radius: 8px !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        page-break-inside: avoid;
+        break-inside: avoid;
+      }
+
+      .weekday-header {
+        background: #fffbeb !important;
+        border-bottom: 1px solid #e5e7eb !important;
+      }
+
+      .weekday {
+        padding: 8px 4px !important;
+        font-size: 0.82rem !important;
+      }
+
+      .calendar-grid {
+        grid-auto-rows: minmax(80px, auto) !important;
+      }
+
+      .day-cell {
+        border-color: #f3f4f6 !important;
+        background: #ffffff !important;
+        min-height: 80px !important;
+        page-break-inside: avoid;
+      }
+
+      .day-cell.other-month {
+        opacity: 0.4;
+      }
+
+      .event-pill, .week-event-card, .day-timeline-card {
+        box-shadow: none !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      .week-view-container {
+        min-height: auto !important;
+        page-break-inside: avoid;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 읽기 전용 모드 안내 상단 배너 -->
+  <div class="readonly-banner" id="readonlyBanner">
+    <span>🔒 <strong>읽기 전용 모드로 열람 중입니다.</strong> (일정 조회만 가능하며 추가/수정/삭제가 제한됩니다)</span>
+  </div>
+
+  <!-- 상단 네비게이션 헤더 -->
+  <header>
+    <div class="header-container">
+      <div class="brand-section">
+        <div class="brand-logo">🧈</div>
+        <div class="brand-info">
+          <h1>Share Schedule</h1>
+        </div>
+      </div>
+
+      <!-- 뷰 모드 탭 (월간 / 주간 / 일간) -->
+      <div class="view-toggle-group">
+        <button class="view-tab-btn active" data-view="month" id="viewMonthBtn">월간</button>
+        <button class="view-tab-btn" data-view="week" id="viewWeekBtn">주간</button>
+        <button class="view-tab-btn" data-view="day" id="viewDayBtn">일간</button>
+      </div>
+
+      <!-- 날짜 내비게이션 컨트롤 -->
+      <div class="nav-controls">
+        <button class="btn-icon" id="prevBtn" title="이전">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </button>
+        <span class="current-date-display" id="currentDateDisplay">2026년 10월</span>
+        <button class="btn-icon" id="nextBtn" title="다음">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </button>
+        <button class="btn-today" id="todayBtn">오늘</button>
+      </div>
+
+      <!-- 공유 및 추가 액션 버튼 -->
+      <div class="actions-section">
+        <button class="btn btn-secondary hide-on-print" id="printBtn" title="캘린더를 인쇄하거나 PDF로 저장합니다">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+          인쇄 / PDF
+        </button>
+        <button class="btn btn-share" id="shareEditBtn" title="누구나 함께 일정을 등록/수정할 수 있는 링크를 복사합니다">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+          일정 공유 링크
+        </button>
+        <button class="btn btn-readonly-share" id="shareReadonlyBtn" title="접속자가 일정 조회만 가능한 읽기 전용 링크를 복사합니다">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+          읽기 전용 링크
+        </button>
+        <button class="btn btn-primary hide-on-readonly" id="openAddModalBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          새 일정 등록
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 메인 캘린더 영역 -->
+  <main>
+    <!-- 인쇄/PDF 출력 전용 헤더 -->
+    <div class="print-only-header" id="printOnlyHeader">
+      <div class="print-brand">🧈 Share Schedule 일정표</div>
+      <div class="print-date" id="printDateText">2026년 10월</div>
+    </div>
+
+    <div class="main-content-layout">
+      <!-- 좌측: 달력 본체 (~70%) -->
+      <div class="calendar-card" id="calendarCard">
+        <!-- 뷰(월/주/일)에 따라 동적으로 마운트 -->
+      </div>
+
+      <!-- 우측: 일정 브리핑 사이드바 (~30%) -->
+      <aside class="schedule-sidebar hide-on-print" id="scheduleSidebar">
+        <!-- 1) 휴가 현황 카드 -->
+        <section class="sidebar-card vacation-card">
+          <div class="sidebar-header-row">
+            <h3 class="sidebar-section-title">🏖️ 휴가 현황</h3>
+            <span class="sidebar-count-badge" id="sidebarVacationCount">0명</span>
+          </div>
+
+          <!-- 오늘의 휴가자 -->
+          <div class="sidebar-sub-section">
+            <div class="sidebar-sub-title">오늘의 휴가자</div>
+            <div class="vacation-chips-container" id="sidebarTodayVacationChips">
+              <!-- JS 렌더링 -->
+            </div>
+          </div>
+
+          <!-- 이번 주 휴가 일정 -->
+          <div class="sidebar-sub-section" style="margin-top: 4px;">
+            <div class="sidebar-sub-title">이번 주 휴가 일정</div>
+            <div class="sidebar-events-container" id="sidebarWeekVacationList" style="max-height: 140px;">
+              <!-- JS 렌더링 -->
+            </div>
+          </div>
+        </section>
+
+        <!-- 2) 오늘의 일정 대형 카드 -->
+        <section class="sidebar-card today-card">
+          <div class="sidebar-header-row">
+            <span class="sidebar-badge-today">TODAY</span>
+            <span class="sidebar-today-date" id="sidebarTodayDate">10월 27일 (화)</span>
+          </div>
+          <div class="sidebar-events-container" id="sidebarTodayEvents">
+            <!-- JS 렌더링 -->
+          </div>
+        </section>
+
+        <!-- 3) 이번 주 일정 요약 카드 -->
+        <section class="sidebar-card">
+          <div class="sidebar-header-row">
+            <h3 class="sidebar-section-title">🗓️ 이번 주 일정</h3>
+            <span class="sidebar-count-badge" id="sidebarWeekCount">0개</span>
+          </div>
+          <div class="sidebar-events-container" id="sidebarWeekEvents">
+            <!-- JS 렌더링 -->
+          </div>
+        </section>
+      </aside>
+    </div>
+  </main>
+
+  <!-- 일정 등록/수정 모달 -->
+  <div class="modal-backdrop" id="eventModalBackdrop">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modalTitle">새 일정 추가</h3>
+        <button class="modal-close" id="closeEventModalBtn">&times;</button>
+      </div>
+      <form id="eventForm">
+        <input type="hidden" id="eventId">
+        <input type="hidden" id="eventCategory" value="normal">
+        <div class="modal-body">
+          <!-- 일정 분류 탭 -->
+          <div class="modal-tab-group">
+            <button type="button" class="modal-tab-btn active" id="tabNormalBtn">
+              <span>📝 일반 일정</span>
+            </button>
+            <button type="button" class="modal-tab-btn" id="tabVacationBtn">
+              <span>🏖️ 휴가 / 연차</span>
+            </button>
+          </div>
+
+          <!-- 1) 일반 일정 입력 필드 -->
+          <div id="normalFieldsBlock">
+            <div class="form-group">
+              <label class="form-label" for="eventTitle">일정 제목 *</label>
+              <input type="text" id="eventTitle" class="form-input" placeholder="예: 베이킹 클래스, 팀 회의" maxlength="60">
+            </div>
+
+            <div class="form-group" style="margin-top: 12px;">
+              <label class="form-label" for="eventDate">날짜 *</label>
+              <input type="date" id="eventDate" class="form-input">
+            </div>
+
+            <!-- 시작 시간 ~ 종료 시간 -->
+            <div class="form-row" style="margin-top: 12px;">
+              <div class="form-group">
+                <label class="form-label" for="eventTime">시작 시간 (선택)</label>
+                <input type="time" id="eventTime" class="form-input">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="eventEndTime">종료 시간 (선택)</label>
+                <input type="time" id="eventEndTime" class="form-input">
+              </div>
+            </div>
+          </div>
+
+          <!-- 2) 휴가 / 연차 입력 필드 -->
+          <div id="vacationFieldsBlock" style="display: none;">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="vacationerName">휴가자 이름 *</label>
+                <input type="text" id="vacationerName" class="form-input" placeholder="예: 홍길동" maxlength="20">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="vacationType">휴가 유형 *</label>
+                <select id="vacationType" class="form-input" style="cursor: pointer;">
+                  <option value="연차">연차 (종일)</option>
+                  <option value="오전반차">오전반차</option>
+                  <option value="오후반차">오후반차</option>
+                  <option value="병가">병가</option>
+                  <option value="출장">출장</option>
+                  <option value="기타">기타 휴가</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row" style="margin-top: 12px;">
+              <div class="form-group">
+                <label class="form-label" for="vacationStartDate">시작일 *</label>
+                <input type="date" id="vacationStartDate" class="form-input">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="vacationEndDate">종료일 *</label>
+                <input type="date" id="vacationEndDate" class="form-input">
+              </div>
+            </div>
+          </div>
+
+          <!-- 공통: 색상 태그 -->
+          <div class="form-group">
+            <label class="form-label">색상 태그</label>
+            <div class="color-picker" id="colorPickerContainer">
+              <div class="color-option color-butter selected" data-color="color-butter" title="버터 레몬"></div>
+              <div class="color-option color-peach" data-color="color-peach" title="피치 오렌지"></div>
+              <div class="color-option color-rose" data-color="color-rose" title="소프트 로즈"></div>
+              <div class="color-option color-sage" data-color="color-sage" title="웜 세이지"></div>
+              <div class="color-option color-sky" data-color="color-sky" title="밀크 스카이"></div>
+              <div class="color-option color-lavender" data-color="color-lavender" title="라벤더 크림"></div>
+              <div class="color-option color-latte" data-color="color-latte" title="크림 라떼"></div>
+            </div>
+          </div>
+
+          <!-- 공통: 메모 / 인수인계 내용 -->
+          <div class="form-group">
+            <label class="form-label" for="eventMemo" id="eventMemoLabel">메모 / 내용 (선택)</label>
+            <textarea id="eventMemo" class="form-textarea" placeholder="장소, 준비물, 인수인계 내용을 적어보세요"></textarea>
+          </div>
+        </div>
+
+        <div class="modal-footer" id="modalFooter" style="justify-content: space-between;">
+          <button type="button" class="btn btn-danger hide-on-readonly" id="deleteEventBtn" style="display: none;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            삭제
+          </button>
+          <div style="display: flex; gap: 8px; margin-left: auto;">
+            <button type="button" class="btn btn-secondary" id="cancelEventModalBtn">취소</button>
+            <button type="submit" class="btn btn-primary hide-on-readonly" id="saveEventBtn">저장하기</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 토스트 알림 컨테이너 -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script>
+    /* =========================================================
+       1. 앱 상태 관리
+       ========================================================= */
+    const STORAGE_KEY = 'sharecal_events_data';
+    let events = [];
+    let currentDate = new Date(); // 현재 뷰의 기준 날짜
+    let currentView = 'month'; // 'month' | 'week' | 'day'
+    let isReadOnlyMode = false;
+    let activeViewingEventId = null;
+    let selectedColor = 'color-butter';
+
+    // UTF-8 안전 Base64 인코더/디코더
+    function encodeStateToBase64(data) {
+      try {
+        const json = JSON.stringify(data);
+        const bytes = new TextEncoder().encode(json);
+        let binary = '';
+        for (let i = 0; i < bytes.byteLength; i++) {
+          binary += String.fromCharCode(bytes[i]);
+        }
+        return btoa(binary);
+      } catch (err) {
+        console.error('인코딩 오류:', err);
+        return null;
+      }
+    }
+
+    function decodeStateFromBase64(base64Str) {
+      try {
+        const binary = atob(base64Str);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) {
+          bytes[i] = binary.charCodeAt(i);
+        }
+        const json = new TextDecoder().decode(bytes);
+        return JSON.parse(json);
+      } catch (err) {
+        console.error('디코딩 오류:', err);
+        return null;
+      }
+    }
+
+    /* =========================================================
+       2. 초기화 및 로드 (읽기 전용 / 공유 링크 파싱)
+       ========================================================= */
+    function loadInitialEvents() {
+      const hash = window.location.hash.substring(1);
+      const params = new URLSearchParams(hash);
+      
+      const mode = params.get('mode');
+      isReadOnlyMode = (mode === 'readonly');
+
+      if (isReadOnlyMode) {
+        document.body.classList.add('is-readonly');
+        document.getElementById('readonlyBanner').classList.add('active');
+      } else {
+        document.body.classList.remove('is-readonly');
+        document.getElementById('readonlyBanner').classList.remove('active');
+      }
+
+      let sharedData = params.get('data');
+
+      if (sharedData) {
+        sharedData = sharedData.replace(/ /g, '+');
+        const restored = decodeStateFromBase64(sharedData);
+        if (Array.isArray(restored)) {
+          events = restored;
+          if (isReadOnlyMode) {
+            showToast('🔒 읽기 전용 공유 일정 모드로 열람 중입니다.');
+          } else {
+            saveEventsToStorage(false); // 수정 가능 모드 공유 시 로컬에 저장
+            showToast('🔗 공유받은 일정을 성공적으로 불러왔습니다!');
+          }
+
+          if (events.length > 0 && events[0].date) {
+            const firstDate = new Date(events[0].date);
+            if (!isNaN(firstDate)) {
+              currentDate = new Date(firstDate.getFullYear(), firstDate.getMonth(), firstDate.getDate());
+            }
+          }
+          return;
+        }
+      }
+
+      // 일반 접속 시 로컬 스토리지에서 로드
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          events = JSON.parse(saved);
+        } else {
+          // 따뜻한 버터 감성 기본 샘플 데이터 (휴가 및 시간 범위 샘플 포함)
+          const todayStr = formatDate(new Date());
+          events = [
+            {
+              id: 'sample-vacation-1',
+              category: 'vacation',
+              vacationer: '김휴가',
+              vacationType: '연차',
+              startDate: todayStr,
+              endDate: todayStr,
+              title: '🏖️ [연차] 김휴가',
+              date: todayStr,
+              color: 'color-rose',
+              memo: '업무 인수인계: 이협업 매니저 (긴급 시 연락 가능)'
+            },
+            {
+              id: 'sample-1',
+              category: 'normal',
+              title: '🧈 버터 스콘 & 커피 타임',
+              date: todayStr,
+              time: '10:00',
+              endTime: '11:30',
+              color: 'color-butter',
+              memo: '달콤한 디저트와 함께 주간 일정 정리하기'
+            },
+            {
+              id: 'sample-2',
+              category: 'normal',
+              title: '📝 주간 기획 & 디자인 리뷰',
+              date: todayStr,
+              time: '14:00',
+              endTime: '15:30',
+              color: 'color-peach',
+              memo: '상단의 [읽기 전용 링크]로 동료들에게 캘린더를 공유해보세요!'
+            }
+          ];
+          saveEventsToStorage(false);
+        }
+      } catch (e) {
+        events = [];
+      }
+    }
+
+    function saveEventsToStorage(notify = false) {
+      if (isReadOnlyMode) return; // 읽기 전용 상태일 때는 로컬스토리지 변경하지 않음
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(events));
+        if (notify) {
+          showToast('일정이 저장되었습니다.');
+        }
+      } catch (e) {
+        console.error('로컬스토리지 저장 실패:', e);
+      }
+    }
+
+    /* =========================================================
+       3. 날짜 및 유틸리티 함수
+       ========================================================= */
+    function formatDate(date) {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+
+    function getDayOfWeekKorean(dayIndex) {
+      return ['일', '월', '화', '수', '목', '금', '토'][dayIndex];
+    }
+
+    function showToast(message) {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.innerHTML = `<span>${message}</span>`;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.remove();
+      }, 3500);
+    }
+
+    // 주간 날짜 범위 계산 (일요일 시작)
+    function getWeekRange(date) {
+      const day = date.getDay(); // 0(일) ~ 6(토)
+      const sunday = new Date(date);
+      sunday.setDate(date.getDate() - day);
+
+      const days = [];
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(sunday);
+        d.setDate(sunday.getDate() + i);
+        days.push(d);
+      }
+      return days;
+    }
+
+    /* =========================================================
+       휴가 / 연차 유틸리티 및 아이콘
+       ========================================================= */
+    function getVacationIcon(type) {
+      switch (type) {
+        case '연차': return '🏖️';
+        case '오전반차': return '⛅';
+        case '오후반차': return '☕';
+        case '병가': return '🏥';
+        case '출장': return '💼';
+        default: return '🌴';
+      }
+    }
+
+    // 특정 날짜에 해당하는 일정/휴가 여부 판별 (시작일~종료일 기간 지원)
+    function isEventOnDate(evt, dateStr) {
+      if (evt.category === 'vacation') {
+        const start = evt.startDate || evt.date;
+        const end = evt.endDate || evt.date || evt.startDate;
+        return dateStr >= start && dateStr <= end;
+      }
+      return evt.date === dateStr;
+    }
+
+    // 일정 시간 포맷팅 ("시작시간 ~ 종료시간" 또는 "시작시간")
+    function formatEventTime(evt) {
+      if (evt.category === 'vacation') {
+        return evt.vacationType || '휴가';
+      }
+      const start = evt.time || '';
+      const end = evt.endTime || '';
+      if (start && end) {
+        return `${start} ~ ${end}`;
+      }
+      if (start) {
+        return start;
+      }
+      if (end) {
+        return `~ ${end}`;
+      }
+      return '';
+    }
+
+    // 같은 날짜 안에서 시간 순서대로 정렬 (휴가 우선 -> 시간순 오름차순)
+    function sortEvents(list) {
+      return list.slice().sort((a, b) => {
+        const aIsVac = (a.category === 'vacation') ? 0 : 1;
+        const bIsVac = (b.category === 'vacation') ? 0 : 1;
+        if (aIsVac !== bIsVac) return aIsVac - bIsVac;
+
+        const aTime = a.time || '00:00';
+        const bTime = b.time || '00:00';
+        if (aTime !== bTime) {
+          return aTime.localeCompare(bTime);
+        }
+        const aEnd = a.endTime || '00:00';
+        const bEnd = b.endTime || '00:00';
+        return aEnd.localeCompare(bEnd);
+      });
+    }
+
+    /* =========================================================
+       대한민국 법정 공휴일 데이터 및 판별기
+       ========================================================= */
+    const SOLAR_HOLIDAYS = {
+      '01-01': '신정',
+      '03-01': '삼일절',
+      '05-05': '어린이날',
+      '06-06': '현충일',
+      '08-15': '광복절',
+      '10-03': '개천절',
+      '10-09': '한글날',
+      '12-25': '크리스마스'
+    };
+
+    const DYNAMIC_HOLIDAYS = {
+      // 2025년
+      '2025-01-28': '설날 연휴',
+      '2025-01-29': '설날',
+      '2025-01-30': '설날 연휴',
+      '2025-03-03': '대체공휴일',
+      '2025-05-06': '대체공휴일',
+      '2025-10-05': '추석 연휴',
+      '2025-10-06': '추석',
+      '2025-10-07': '추석 연휴',
+      '2025-10-08': '대체공휴일',
+      // 2026년
+      '2026-02-16': '설날 연휴',
+      '2026-02-17': '설날',
+      '2026-02-18': '설날 연휴',
+      '2026-03-02': '대체공휴일',
+      '2026-05-24': '부처님오신날',
+      '2026-05-25': '대체공휴일',
+      '2026-09-24': '추석 연휴',
+      '2026-09-25': '추석',
+      '2026-09-26': '추석 연휴',
+      '2026-10-05': '대체공휴일',
+      // 2027년
+      '2027-02-06': '설날 연휴',
+      '2027-02-07': '설날',
+      '2027-02-08': '설날 연휴',
+      '2027-02-09': '대체공휴일',
+      '2027-05-13': '부처님오신날',
+      '2027-09-14': '추석 연휴',
+      '2027-09-15': '추석',
+      '2027-09-16': '추석 연휴'
+    };
+
+    function getPublicHoliday(dateStr) {
+      if (DYNAMIC_HOLIDAYS[dateStr]) {
+        return DYNAMIC_HOLIDAYS[dateStr];
+      }
+      const mmdd = dateStr.slice(5);
+      return SOLAR_HOLIDAYS[mmdd] || null;
+    }
+
+    /* =========================================================
+       4. 뷰 렌더러 (월간 / 주간 / 일간 통합 제어)
+       ========================================================= */
+    function renderMainView() {
+      const card = document.getElementById('calendarCard');
+      const dateDisplay = document.getElementById('currentDateDisplay');
+
+      // 상단 탭 활성화 상태 동기화
+      document.querySelectorAll('.view-tab-btn').forEach(btn => {
+        if (btn.getAttribute('data-view') === currentView) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+
+      if (currentView === 'month') {
+        renderMonthView(card, dateDisplay);
+      } else if (currentView === 'week') {
+        renderWeekView(card, dateDisplay);
+      } else if (currentView === 'day') {
+        renderDayView(card, dateDisplay);
+      }
+
+      // 우측 사이드바 동기화 렌더링
+      renderSidebar();
+    }
+
+    // --- 1) 월간 뷰 ---
+    function renderMonthView(container, dateDisplay) {
+      const year = currentDate.getFullYear();
+      const month = currentDate.getMonth();
+      dateDisplay.textContent = `${year}년 ${month + 1}월`;
+
+      container.innerHTML = `
+        <div class="weekday-header">
+          <div class="weekday sun">일</div>
+          <div class="weekday">월</div>
+          <div class="weekday">화</div>
+          <div class="weekday">수</div>
+          <div class="weekday">목</div>
+          <div class="weekday">금</div>
+          <div class="weekday sat">토</div>
+        </div>
+        <div class="calendar-grid" id="monthGrid"></div>
+      `;
+
+      const grid = document.getElementById('monthGrid');
+      const firstDay = new Date(year, month, 1);
+      const lastDay = new Date(year, month + 1, 0);
+
+      const startDayOfWeek = firstDay.getDay();
+      const daysInMonth = lastDay.getDate();
+      const prevMonthLastDate = new Date(year, month, 0).getDate();
+
+      const todayStr = formatDate(new Date());
+      const totalCells = (startDayOfWeek + daysInMonth > 35) ? 42 : 35;
+
+      for (let i = 0; i < totalCells; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'day-cell';
+
+        let dateObj;
+        let isCurrentMonth = true;
+
+        if (i < startDayOfWeek) {
+          const dayNum = prevMonthLastDate - startDayOfWeek + i + 1;
+          dateObj = new Date(year, month - 1, dayNum);
+          isCurrentMonth = false;
+          cell.classList.add('other-month');
+        } else if (i >= startDayOfWeek + daysInMonth) {
+          const dayNum = i - (startDayOfWeek + daysInMonth) + 1;
+          dateObj = new Date(year, month + 1, dayNum);
+          isCurrentMonth = false;
+          cell.classList.add('other-month');
+        } else {
+          const dayNum = i - startDayOfWeek + 1;
+          dateObj = new Date(year, month, dayNum);
+        }
+
+        const dateStr = formatDate(dateObj);
+        const dayOfWeek = dateObj.getDay();
+        const holiday = getPublicHoliday(dateStr);
+
+        if (dayOfWeek === 0) cell.classList.add('is-sun');
+        if (dayOfWeek === 6) cell.classList.add('is-sat');
+        if (holiday) cell.classList.add('is-holiday');
+        if (dateStr === todayStr) cell.classList.add('today');
+
+        // 셀 헤더 (날짜 숫자, 공휴일 태그, 추가 버튼)
+        const header = document.createElement('div');
+        header.className = 'day-header';
+
+        const numWrapper = document.createElement('div');
+        numWrapper.className = 'day-num-wrapper';
+
+        const numSpan = document.createElement('span');
+        numSpan.className = 'day-number';
+        numSpan.textContent = dateObj.getDate();
+        numWrapper.appendChild(numSpan);
+
+        if (holiday) {
+          const holidayBadge = document.createElement('span');
+          holidayBadge.className = 'holiday-badge';
+          holidayBadge.textContent = holiday;
+          holidayBadge.title = holiday;
+          numWrapper.appendChild(holidayBadge);
+        }
+
+        header.appendChild(numWrapper);
+
+        if (!isReadOnlyMode) {
+          const addBtn = document.createElement('button');
+          addBtn.className = 'cell-add-btn';
+          addBtn.title = '이 날짜에 새 일정/휴가 추가';
+          addBtn.innerHTML = '+';
+          addBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            openAddModal(dateStr);
+          });
+          header.appendChild(addBtn);
+        }
+
+        cell.appendChild(header);
+
+        // 일정 목록 (휴가 일정을 상단에 우선 배치하고, 시간순 오름차순 정렬)
+        const eventsContainer = document.createElement('div');
+        eventsContainer.className = 'events-container';
+
+        const dayEvents = sortEvents(events.filter(evt => isEventOnDate(evt, dateStr)));
+
+        dayEvents.forEach(evt => {
+          const isVac = evt.category === 'vacation';
+          const pill = document.createElement('div');
+          pill.className = `event-pill ${isVac ? 'is-vacation' : (evt.color || 'color-butter')}`;
+          pill.setAttribute('data-id', evt.id);
+
+          const timeStr = formatEventTime(evt);
+          if (timeStr) {
+            const timeSpan = document.createElement('span');
+            timeSpan.className = 'event-time';
+            timeSpan.textContent = timeStr;
+            pill.appendChild(timeSpan);
+          }
+
+          const titleSpan = document.createElement('span');
+          titleSpan.className = 'event-title';
+          titleSpan.textContent = evt.title || '제목 없음';
+          pill.appendChild(titleSpan);
+
+          pill.addEventListener('click', (e) => {
+            e.stopPropagation();
+            openEditModal(evt.id);
+          });
+
+          eventsContainer.appendChild(pill);
+        });
+
+        cell.appendChild(eventsContainer);
+
+        // 빈 영역 클릭 시 동작
+        cell.addEventListener('click', () => {
+          if (isReadOnlyMode) {
+            showToast('🔒 읽기 전용 모드에서는 일정을 추가할 수 없습니다.');
+          } else {
+            openAddModal(dateStr);
+          }
+        });
+
+        grid.appendChild(cell);
+      }
+    }
+
+    // --- 2) 주간 뷰 ---
+    function renderWeekView(container, dateDisplay) {
+      const weekDays = getWeekRange(currentDate);
+      const first = weekDays[0];
+      const last = weekDays[6];
+
+      dateDisplay.textContent = `${first.getFullYear()}. ${first.getMonth() + 1}. ${first.getDate()} ~ ${last.getMonth() + 1}. ${last.getDate()}`;
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'week-view-container';
+
+      const todayStr = formatDate(new Date());
+
+      weekDays.forEach(dayObj => {
+        const dateStr = formatDate(dayObj);
+        const dayOfWeek = dayObj.getDay();
+        const isToday = (dateStr === todayStr);
+        const holiday = getPublicHoliday(dateStr);
+
+        const column = document.createElement('div');
+        column.className = `week-column ${isToday ? 'today' : ''} ${holiday ? 'is-holiday' : ''}`;
+
+        // 주간 요일 헤더
+        const header = document.createElement('div');
+        header.className = 'week-column-header';
+
+        const nameSpan = document.createElement('span');
+        nameSpan.className = `week-day-name ${dayOfWeek === 0 || holiday ? 'sun' : dayOfWeek === 6 ? 'sat' : ''}`;
+        nameSpan.textContent = getDayOfWeekKorean(dayOfWeek);
+
+        const badgeSpan = document.createElement('span');
+        badgeSpan.className = 'week-day-badge';
+        badgeSpan.textContent = dayObj.getDate();
+
+        header.appendChild(nameSpan);
+        header.appendChild(badgeSpan);
+
+        if (holiday) {
+          const holidayBadge = document.createElement('span');
+          holidayBadge.className = 'week-holiday-badge';
+          holidayBadge.textContent = holiday;
+          header.appendChild(holidayBadge);
+        }
+
+        column.appendChild(header);
+
+        // 본문 일정 카드 목록 (시간순 오름차순 정렬)
+        const body = document.createElement('div');
+        body.className = 'week-column-body';
+
+        const dayEvents = sortEvents(events.filter(e => isEventOnDate(e, dateStr)));
+
+        dayEvents.forEach(evt => {
+          const isVac = evt.category === 'vacation';
+          const card = document.createElement('div');
+          card.className = `week-event-card ${isVac ? 'is-vacation' : (evt.color || 'color-butter')}`;
+
+          const cardTop = document.createElement('div');
+          cardTop.className = 'card-top';
+
+          const titleSpan = document.createElement('span');
+          titleSpan.className = 'card-title';
+          titleSpan.textContent = evt.title;
+          cardTop.appendChild(titleSpan);
+
+          const timeStr = formatEventTime(evt);
+          if (timeStr) {
+            const timeSpan = document.createElement('span');
+            timeSpan.className = 'card-time';
+            timeSpan.textContent = timeStr;
+            cardTop.appendChild(timeSpan);
+          }
+
+          card.appendChild(cardTop);
+
+          if (evt.memo && evt.memo.trim()) {
+            const memoSpan = document.createElement('span');
+            memoSpan.className = 'card-memo';
+            memoSpan.textContent = evt.memo;
+            card.appendChild(memoSpan);
+          }
+
+          card.addEventListener('click', (e) => {
+            e.stopPropagation();
+            openEditModal(evt.id);
+          });
+
+          body.appendChild(card);
+        });
+
+        // 일정 추가 유도 버튼 (읽기 전용 제외)
+        if (!isReadOnlyMode) {
+          const addPrompt = document.createElement('div');
+          addPrompt.className = 'week-add-prompt';
+          addPrompt.innerHTML = '+ 일정/휴가 추가';
+          addPrompt.addEventListener('click', () => openAddModal(dateStr));
+          body.appendChild(addPrompt);
+        }
+
+        column.appendChild(body);
+        wrapper.appendChild(column);
+      });
+
+      container.innerHTML = '';
+      container.appendChild(wrapper);
+    }
+
+    // --- 3) 일간 뷰 ---
+    function renderDayView(container, dateDisplay) {
+      const year = currentDate.getFullYear();
+      const month = currentDate.getMonth() + 1;
+      const day = currentDate.getDate();
+      const dayOfWeekName = getDayOfWeekKorean(currentDate.getDay());
+      const dateStr = formatDate(currentDate);
+      const holiday = getPublicHoliday(dateStr);
+
+      dateDisplay.textContent = `${year}년 ${month}월 ${day}일 (${dayOfWeekName})`;
+
+      const dayEvents = sortEvents(events.filter(e => isEventOnDate(e, dateStr)));
+
+      let eventsHtml = '';
+      if (dayEvents.length === 0) {
+        eventsHtml = `
+          <div class="day-empty-state">
+            <div class="empty-icon">☕</div>
+            <p>오늘 예정된 일정이 없습니다. 여유로운 하루를 즐겨보세요!</p>
+            ${!isReadOnlyMode ? `<button class="btn btn-primary" onclick="openAddModal('${dateStr}')">+ 새 일정/휴가 등록하기</button>` : ''}
+          </div>
+        `;
+      } else {
+        eventsHtml = dayEvents.map(evt => {
+          const isVac = evt.category === 'vacation';
+          const timeDisplay = formatEventTime(evt) || '종일';
+          return `
+            <div class="day-timeline-card ${isVac ? 'is-vacation' : (evt.color || 'color-butter')}" onclick="openEditModal('${evt.id}')">
+              <div class="day-card-time">${timeDisplay}</div>
+              <div class="day-card-content">
+                <div class="day-card-title">${escapeHtml(evt.title)}</div>
+                ${evt.memo ? `<div class="day-card-memo">${escapeHtml(evt.memo)}</div>` : ''}
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      const holidayBadgeHtml = holiday ? `<span class="day-holiday-badge">🎌 ${holiday}</span>` : '';
+
+      container.innerHTML = `
+        <div class="day-view-container">
+          <div class="day-banner-card">
+            <div>
+              <div class="day-banner-title">
+                <span>🗓️ ${month}월 ${day}일 (${dayOfWeekName})</span>
+                ${holidayBadgeHtml}
+              </div>
+              <div class="day-banner-desc">총 ${dayEvents.length}개의 일정 및 휴가가 등록되어 있습니다.</div>
+            </div>
+            ${!isReadOnlyMode ? `
+              <button class="btn btn-primary" onclick="openAddModal('${dateStr}')">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                일정/휴가 추가
+              </button>
+            ` : ''}
+          </div>
+          <div class="day-timeline-list">
+            ${eventsHtml}
+          </div>
+        </div>
+      `;
+    }
+
+    /* =========================================================
+       우측 사이드바 렌더러 (휴가 현황 & 오늘의 일정 & 이번 주 일정)
+       ========================================================= */
+    function renderSidebar() {
+      renderVacationBriefing();
+      renderTodayBriefing();
+      renderWeekBriefing();
+    }
+
+    // 1) 휴가 현황 위젯 (오늘 & 이번 주)
+    function renderVacationBriefing() {
+      const today = new Date();
+      const todayStr = formatDate(today);
+
+      const weekDays = getWeekRange(currentDate);
+      const weekStartStr = formatDate(weekDays[0]);
+      const weekEndStr = formatDate(weekDays[6]);
+
+      // 오늘 휴가자 추출
+      const todayVacations = sortEvents(events.filter(e => e.category === 'vacation' && isEventOnDate(e, todayStr)));
+
+      // 이번 주 휴가 일정 추출 (기간 겹침 확인)
+      const weekVacations = events.filter(e => {
+        if (e.category !== 'vacation') return false;
+        const start = e.startDate || e.date;
+        const end = e.endDate || e.date;
+        return start <= weekEndStr && end >= weekStartStr;
+      }).sort((a, b) => (a.startDate || a.date).localeCompare(b.startDate || b.date));
+
+      // 상단 카운트 뱃지 (오늘 휴가자 수 표기)
+      const countBadge = document.getElementById('sidebarVacationCount');
+      if (countBadge) {
+        countBadge.textContent = `${todayVacations.length}명`;
+      }
+
+      // 오늘 휴가자 칩 렌더링
+      const todayChipsContainer = document.getElementById('sidebarTodayVacationChips');
+      if (todayChipsContainer) {
+        todayChipsContainer.innerHTML = '';
+        if (todayVacations.length === 0) {
+          todayChipsContainer.innerHTML = `<div style="width:100%; background:var(--bg-vanilla); border-radius:14px; padding:16px; font-size:0.88rem; color:var(--text-muted); text-align:center;">오늘 휴가자가 없습니다 💼</div>`;
+        } else {
+          todayVacations.forEach(v => {
+            const chip = document.createElement('div');
+            chip.className = 'vacation-chip';
+            const icon = getVacationIcon(v.vacationType);
+            chip.innerHTML = `<span>${icon} ${escapeHtml(v.vacationer || '휴가자')}</span><span class="vacation-type-tag">${escapeHtml(v.vacationType || '연차')}</span>`;
+            chip.addEventListener('click', () => openEditModal(v.id));
+            todayChipsContainer.appendChild(chip);
+          });
+        }
+      }
+
+      // 이번 주 휴가 리스트 렌더링
+      const weekVacationList = document.getElementById('sidebarWeekVacationList');
+      if (weekVacationList) {
+        weekVacationList.innerHTML = '';
+        if (weekVacations.length === 0) {
+          weekVacationList.innerHTML = `<div style="width:100%; background:var(--bg-vanilla); border-radius:14px; padding:16px; font-size:0.88rem; color:var(--text-muted); text-align:center;">이번 주 예정된 휴가가 없습니다 🏖️</div>`;
+        } else {
+          weekVacations.forEach(v => {
+            const item = document.createElement('div');
+            item.className = 'sidebar-item-card is-vacation';
+            const icon = getVacationIcon(v.vacationType);
+            const startObj = new Date(v.startDate || v.date);
+            const endObj = new Date(v.endDate || v.date);
+            const isMultiDay = (v.startDate && v.endDate && v.startDate !== v.endDate);
+            const dateText = isMultiDay
+              ? `${startObj.getMonth()+1}.${startObj.getDate()} ~ ${endObj.getMonth()+1}.${endObj.getDate()}`
+              : `${startObj.getMonth()+1}.${startObj.getDate()} (${getDayOfWeekKorean(startObj.getDay())})`;
+
+            item.innerHTML = `
+              <div class="sidebar-item-top">
+                <div style="display:flex; align-items:center; gap:8px; overflow:hidden;">
+                  <span class="sidebar-item-date-badge">${dateText}</span>
+                  <span class="sidebar-item-title">${icon} ${escapeHtml(v.vacationer || '휴가자')}</span>
+                </div>
+                <span class="vacation-type-tag">${escapeHtml(v.vacationType || '연차')}</span>
+              </div>
+              ${v.memo ? `<div class="sidebar-item-memo">${escapeHtml(v.memo)}</div>` : ''}
+            `;
+            item.addEventListener('click', () => openEditModal(v.id));
+            weekVacationList.appendChild(item);
+          });
+        }
+      }
+    }
+
+    // 2) 오늘 일정 브리핑
+    function renderTodayBriefing() {
+      const today = new Date();
+      const todayStr = formatDate(today);
+      const m = today.getMonth() + 1;
+      const d = today.getDate();
+      const dow = getDayOfWeekKorean(today.getDay());
+      const holiday = getPublicHoliday(todayStr);
+
+      const todayDateEl = document.getElementById('sidebarTodayDate');
+      if (todayDateEl) {
+        todayDateEl.innerHTML = `${m}월 ${d}일 (${dow})${holiday ? ` <span style="font-size:0.75rem; color:#ef4444; font-weight:700;">[${holiday}]</span>` : ''}`;
+      }
+
+      const container = document.getElementById('sidebarTodayEvents');
+      if (!container) return;
+      container.innerHTML = '';
+
+      const todayEvents = sortEvents(events.filter(e => isEventOnDate(e, todayStr) && e.category !== 'vacation'));
+
+      if (todayEvents.length === 0) {
+        container.innerHTML = `
+          <div class="sidebar-empty-box">
+            <span style="font-size:1.3rem;">☕</span>
+            <span>오늘 등록된 일정이 없어요</span>
+            ${!isReadOnlyMode ? `<button class="btn btn-secondary" style="font-size:0.82rem; padding:6px 14px; margin-top:8px;" onclick="openAddModal('${todayStr}')">+ 오늘 일정 등록</button>` : ''}
+          </div>
+        `;
+        return;
+      }
+
+      todayEvents.forEach(evt => {
+        const item = document.createElement('div');
+        item.className = `sidebar-item-card ${evt.color || 'color-butter'}`;
+        const timeDisplay = formatEventTime(evt) || '종일';
+        item.innerHTML = `
+          <div class="sidebar-item-top">
+            <span class="sidebar-item-title">${escapeHtml(evt.title)}</span>
+            <span class="sidebar-item-time">${timeDisplay}</span>
+          </div>
+          ${evt.memo ? `<div class="sidebar-item-memo">${escapeHtml(evt.memo)}</div>` : ''}
+        `;
+        item.addEventListener('click', () => openEditModal(evt.id));
+        container.appendChild(item);
+      });
+    }
+
+    // 3) 이번 주 일정 브리핑
+    function renderWeekBriefing() {
+      const weekDays = getWeekRange(currentDate);
+      const weekStartStr = formatDate(weekDays[0]);
+      const weekEndStr = formatDate(weekDays[6]);
+
+      const weekEvents = events
+        .filter(e => {
+          if (e.category === 'vacation') return false; // 휴가는 상단 휴가 현황에서 표시
+          return isEventOnDate(e, e.date) && e.date >= weekStartStr && e.date <= weekEndStr;
+        })
+        .sort((a, b) => {
+          if (a.date !== b.date) return a.date.localeCompare(b.date);
+          const aTime = a.time || '00:00';
+          const bTime = b.time || '00:00';
+          return aTime.localeCompare(bTime);
+        });
+
+      const countBadge = document.getElementById('sidebarWeekCount');
+      if (countBadge) {
+        countBadge.textContent = `${weekEvents.length}개`;
+      }
+
+      const container = document.getElementById('sidebarWeekEvents');
+      if (!container) return;
+      container.innerHTML = '';
+
+      if (weekEvents.length === 0) {
+        container.innerHTML = `
+          <div class="sidebar-empty-box">
+            <span style="font-size:1.3rem;">✨</span>
+            <span>이번 주 일정이 없습니다</span>
+          </div>
+        `;
+        return;
+      }
+
+      weekEvents.forEach(evt => {
+        const dObj = new Date(evt.date);
+        const m = dObj.getMonth() + 1;
+        const d = dObj.getDate();
+        const dow = getDayOfWeekKorean(dObj.getDay());
+        const timeDisplay = formatEventTime(evt) || '종일';
+
+        const item = document.createElement('div');
+        item.className = `sidebar-item-card ${evt.color || 'color-butter'}`;
+        item.innerHTML = `
+          <div class="sidebar-item-top">
+            <div style="display:flex; align-items:center; gap:6px; overflow:hidden;">
+              <span class="sidebar-item-date-badge">${m}.${d} (${dow})</span>
+              <span class="sidebar-item-title">${escapeHtml(evt.title)}</span>
+            </div>
+            <span class="sidebar-item-time">${timeDisplay}</span>
+          </div>
+          ${evt.memo ? `<div class="sidebar-item-memo">${escapeHtml(evt.memo)}</div>` : ''}
+        `;
+        item.addEventListener('click', () => openEditModal(evt.id));
+        container.appendChild(item);
+      });
+    }
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      return text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    /* =========================================================
+       5. 단일 통합 모달 (등록 / 상세 / 수정 / 삭제 완벽 연동)
+       ========================================================= */
+    const eventModalBackdrop = document.getElementById('eventModalBackdrop');
+    const eventForm = document.getElementById('eventForm');
+
+    function setModalCategory(category) {
+      document.getElementById('eventCategory').value = category;
+      const tabNormal = document.getElementById('tabNormalBtn');
+      const tabVacation = document.getElementById('tabVacationBtn');
+      const normalBlock = document.getElementById('normalFieldsBlock');
+      const vacationBlock = document.getElementById('vacationFieldsBlock');
+      const memoLabel = document.getElementById('eventMemoLabel');
+
+      if (category === 'vacation') {
+        tabVacation.classList.add('active');
+        tabNormal.classList.remove('active');
+        normalBlock.style.display = 'none';
+        vacationBlock.style.display = 'block';
+        memoLabel.textContent = '사유 / 인수인계 내용 (선택)';
+        setSelectedColor('color-rose');
+      } else {
+        tabNormal.classList.add('active');
+        tabVacation.classList.remove('active');
+        normalBlock.style.display = 'block';
+        vacationBlock.style.display = 'none';
+        memoLabel.textContent = '메모 / 내용 (선택)';
+      }
+    }
+
+    document.getElementById('tabNormalBtn').addEventListener('click', () => setModalCategory('normal'));
+    document.getElementById('tabVacationBtn').addEventListener('click', () => setModalCategory('vacation'));
+
+    // 새 일정 등록 모드 열기
+    function openAddModal(dateStr, initialCategory = 'normal') {
+      if (isReadOnlyMode) {
+        showToast('🔒 읽기 전용 모드에서는 일정을 추가할 수 없습니다.');
+        return;
+      }
+      activeViewingEventId = null;
+      const targetDate = dateStr || formatDate(currentDate);
+
+      document.getElementById('modalTitle').textContent = '새 일정 / 휴가 등록';
+      document.getElementById('eventId').value = '';
+      document.getElementById('eventTitle').value = '';
+      document.getElementById('eventDate').value = targetDate;
+      document.getElementById('eventTime').value = '';
+      document.getElementById('eventEndTime').value = '';
+      document.getElementById('vacationerName').value = '';
+      document.getElementById('vacationType').value = '연차';
+      document.getElementById('vacationStartDate').value = targetDate;
+      document.getElementById('vacationEndDate').value = targetDate;
+      document.getElementById('eventMemo').value = '';
+
+      // 등록 시 저장하기 버튼 및 삭제 버튼 숨김
+      document.getElementById('saveEventBtn').textContent = '저장하기';
+      document.getElementById('deleteEventBtn').style.display = 'none';
+      document.getElementById('cancelEventModalBtn').textContent = '취소';
+
+      setModalCategory(initialCategory);
+      setFieldsDisabled(false);
+
+      eventModalBackdrop.classList.add('active');
+      setTimeout(() => {
+        if (initialCategory === 'vacation') {
+          document.getElementById('vacationerName').focus();
+        } else {
+          document.getElementById('eventTitle').focus();
+        }
+      }, 100);
+    }
+
+    // 일정 상세 확인 및 바로 수정 모드 열기 (일정 클릭 시 호출)
+    function openEditModal(id) {
+      const evt = events.find(e => e.id === id);
+      if (!evt) return;
+
+      activeViewingEventId = id;
+      document.getElementById('eventId').value = evt.id;
+      const isVac = (evt.category === 'vacation');
+
+      document.getElementById('modalTitle').textContent = isVac ? '휴가 상세 및 수정' : '일정 상세 및 수정';
+      document.getElementById('eventMemo').value = evt.memo || '';
+      setSelectedColor(evt.color || (isVac ? 'color-rose' : 'color-butter'));
+
+      if (isVac) {
+        setModalCategory('vacation');
+        document.getElementById('vacationerName').value = evt.vacationer || '';
+        document.getElementById('vacationType').value = evt.vacationType || '연차';
+        document.getElementById('vacationStartDate').value = evt.startDate || evt.date;
+        document.getElementById('vacationEndDate').value = evt.endDate || evt.date;
+      } else {
+        setModalCategory('normal');
+        document.getElementById('eventTitle').value = evt.title || '';
+        document.getElementById('eventDate').value = evt.date || '';
+        document.getElementById('eventTime').value = evt.time || '';
+        document.getElementById('eventEndTime').value = evt.endTime || '';
+      }
+
+      // 읽기 전용 모드에 따른 버튼 및 입력 필드 상태 제어
+      const deleteBtn = document.getElementById('deleteEventBtn');
+      const saveBtn = document.getElementById('saveEventBtn');
+      const cancelBtn = document.getElementById('cancelEventModalBtn');
+
+      if (isReadOnlyMode) {
+        deleteBtn.style.display = 'none';
+        saveBtn.style.display = 'none';
+        cancelBtn.textContent = '닫기';
+        setFieldsDisabled(true);
+      } else {
+        deleteBtn.style.display = 'inline-flex';
+        saveBtn.style.display = 'inline-flex';
+        saveBtn.textContent = '수정 완료';
+        cancelBtn.textContent = '취소';
+        setFieldsDisabled(false);
+      }
+
+      eventModalBackdrop.classList.add('active');
+    }
+
+    function setFieldsDisabled(disabled) {
+      const inputs = eventForm.querySelectorAll('input, select, textarea');
+      inputs.forEach(input => {
+        if (input.id !== 'eventId' && input.id !== 'eventCategory') {
+          input.disabled = disabled;
+        }
+      });
+      // 색상 피커 비활성화
+      const colorOptions = document.querySelectorAll('.color-option');
+      colorOptions.forEach(opt => {
+        opt.style.pointerEvents = disabled ? 'none' : 'auto';
+      });
+    }
+
+    function closeEventModal() {
+      eventModalBackdrop.classList.remove('active');
+      activeViewingEventId = null;
+    }
+
+    function setSelectedColor(colorClass) {
+      selectedColor = colorClass;
+      document.querySelectorAll('.color-option').forEach(el => {
+        if (el.getAttribute('data-color') === colorClass) {
+          el.classList.add('selected');
+        } else {
+          el.classList.remove('selected');
+        }
+      });
+    }
+
+    // 색상 팔레트 클릭
+    document.getElementById('colorPickerContainer').addEventListener('click', (e) => {
+      const option = e.target.closest('.color-option');
+      if (option) {
+        setSelectedColor(option.getAttribute('data-color'));
+      }
+    });
+
+    // 폼 저장 / 수정완료 핸들러
+    eventForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (isReadOnlyMode) return;
+
+      const id = document.getElementById('eventId').value;
+      const category = document.getElementById('eventCategory').value;
+      const memo = document.getElementById('eventMemo').value.trim();
+
+      let eventData = { id, category, color: selectedColor, memo };
+
+      if (category === 'vacation') {
+        const vacationer = document.getElementById('vacationerName').value.trim();
+        const vacationType = document.getElementById('vacationType').value;
+        let startDate = document.getElementById('vacationStartDate').value;
+        let endDate = document.getElementById('vacationEndDate').value || startDate;
+
+        if (!vacationer) {
+          showToast('휴가자 이름을 입력해주세요.');
+          return;
+        }
+        if (!startDate) {
+          showToast('시작일을 선택해주세요.');
+          return;
+        }
+        if (startDate > endDate) {
+          endDate = startDate;
+        }
+
+        const icon = getVacationIcon(vacationType);
+        const title = `${icon} [${vacationType}] ${vacationer}`;
+
+        eventData = {
+          ...eventData,
+          title,
+          vacationer,
+          vacationType,
+          startDate,
+          endDate,
+          date: startDate // 하위 호환
+        };
+      } else {
+        const title = document.getElementById('eventTitle').value.trim();
+        const date = document.getElementById('eventDate').value;
+        const time = document.getElementById('eventTime').value;
+        const endTime = document.getElementById('eventEndTime').value;
+
+        if (!title || !date) {
+          showToast('일정 제목과 날짜를 입력해주세요.');
+          return;
+        }
+
+        eventData = {
+          ...eventData,
+          title,
+          date,
+          time,
+          endTime
+        };
+      }
+
+      if (id) {
+        const index = events.findIndex(item => item.id === id);
+        if (index !== -1) {
+          events[index] = eventData;
+          showToast('일정이 성공적으로 수정되었습니다.');
+        }
+      } else {
+        eventData.id = 'evt_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+        events.push(eventData);
+        showToast(category === 'vacation' ? '🏖️ 휴가 일정이 등록되었습니다.' : '새 일정이 등록되었습니다.');
+      }
+
+      saveEventsToStorage(false);
+      renderMainView();
+      closeEventModal();
+    });
+
+    // 모달 내 삭제 버튼 이벤트 연결
+    document.getElementById('deleteEventBtn').addEventListener('click', () => {
+      if (isReadOnlyMode || !activeViewingEventId) return;
+      if (confirm('이 일정을 정말 삭제하시겠습니까?')) {
+        events = events.filter(e => e.id !== activeViewingEventId);
+        saveEventsToStorage(false);
+        renderMainView();
+        closeEventModal();
+        showToast('일정이 성공적으로 삭제되었습니다.');
+      }
+    });
+
+    document.getElementById('closeEventModalBtn').addEventListener('click', closeEventModal);
+    document.getElementById('cancelEventModalBtn').addEventListener('click', closeEventModal);
+    document.getElementById('openAddModalBtn').addEventListener('click', () => openAddModal());
+
+    // ESC 키로 모달 닫기
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeEventModal();
+      }
+    });
+
+    // 바깥 배경 클릭 시 모달 닫기
+    eventModalBackdrop.addEventListener('click', (e) => {
+      if (e.target === eventModalBackdrop) closeEventModal();
+    });
+
+    /* =========================================================
+       6. 공유 링크 생성 (일반 공유 / 읽기 전용 공유)
+       ========================================================= */
+    async function copyUrlToClipboard(url, successMsg) {
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(url);
+        } else {
+          const textarea = document.createElement('textarea');
+          textarea.value = url;
+          textarea.style.position = 'fixed';
+          textarea.style.opacity = '0';
+          document.body.appendChild(textarea);
+          textarea.select();
+          document.execCommand('copy');
+          document.body.removeChild(textarea);
+        }
+        showToast(successMsg);
+      } catch (err) {
+        prompt('아래 링크를 복사하여 전달하세요:', url);
+      }
+    }
+
+    // 1) 일반 일정 공유 링크 (등록/수정 가능)
+    document.getElementById('shareEditBtn').addEventListener('click', () => {
+      const base64Data = encodeStateToBase64(events);
+      if (!base64Data) {
+        showToast('일정 데이터 인코딩 중 오류가 발생했습니다.');
+        return;
+      }
+      const baseUrl = window.location.href.split('#')[0];
+      const shareUrl = `${baseUrl}#data=${encodeURIComponent(base64Data)}`;
+      copyUrlToClipboard(shareUrl, '📋 [공유 링크] 복사 완료! 누구나 일정을 추가/수정할 수 있습니다.');
+    });
+
+    // 2) 읽기 전용 공유 링크 (조회만 가능)
+    document.getElementById('shareReadonlyBtn').addEventListener('click', () => {
+      const base64Data = encodeStateToBase64(events);
+      if (!base64Data) {
+        showToast('일정 데이터 인코딩 중 오류가 발생했습니다.');
+        return;
+      }
+      const baseUrl = window.location.href.split('#')[0];
+      const shareUrl = `${baseUrl}#mode=readonly&data=${encodeURIComponent(base64Data)}`;
+      copyUrlToClipboard(shareUrl, '🔒 [읽기 전용 링크] 복사 완료! 접속자는 일정 조회만 가능합니다.');
+    });
+
+    /* =========================================================
+       7. 뷰 전환 및 날짜 내비게이션
+       ========================================================= */
+    // 뷰 전환 탭
+    document.getElementById('viewMonthBtn').addEventListener('click', () => {
+      currentView = 'month';
+      renderMainView();
+    });
+    document.getElementById('viewWeekBtn').addEventListener('click', () => {
+      currentView = 'week';
+      renderMainView();
+    });
+    document.getElementById('viewDayBtn').addEventListener('click', () => {
+      currentView = 'day';
+      renderMainView();
+    });
+
+    // 뷰 단위별 이전/다음 이동 핸들러
+    function goToPrev() {
+      if (currentView === 'month') {
+        currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
+      } else if (currentView === 'week') {
+        currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() - 7);
+      } else if (currentView === 'day') {
+        currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() - 1);
+      }
+      renderMainView();
+    }
+
+    function goToNext() {
+      if (currentView === 'month') {
+        currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
+      } else if (currentView === 'week') {
+        currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() + 7);
+      } else if (currentView === 'day') {
+        currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() + 1);
+      }
+      renderMainView();
+    }
+
+    // 버튼 이벤트 연결
+    document.getElementById('prevBtn').addEventListener('click', goToPrev);
+    document.getElementById('nextBtn').addEventListener('click', goToNext);
+
+    // 오늘 버튼
+    document.getElementById('todayBtn').addEventListener('click', () => {
+      currentDate = new Date();
+      renderMainView();
+    });
+
+    /* =========================================================
+       8. 모바일 터치 스와이프 제스처 (좌우 스와이프 탐지)
+       ========================================================= */
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchStartTime = 0;
+
+    const calendarCardElement = document.getElementById('calendarCard');
+
+    calendarCardElement.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 1) {
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+        touchStartTime = Date.now();
+      }
+    }, { passive: true });
+
+    calendarCardElement.addEventListener('touchend', (e) => {
+      if (e.changedTouches.length === 1) {
+        const touchEndX = e.changedTouches[0].clientX;
+        const touchEndY = e.changedTouches[0].clientY;
+        const deltaX = touchEndX - touchStartX;
+        const deltaY = touchEndY - touchStartY;
+        const duration = Date.now() - touchStartTime;
+
+        // 조건 검증:
+        // 1. 수평 이동 거리가 수직 이동 거리보다 커야 함 (상하 스크롤 오작동 방지)
+        // 2. 수평 이동 거리가 최소 50px 이상이어야 함
+        // 3. 제스처 시간이 800ms 이내여야 함
+        if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) >= 50 && duration < 800) {
+          if (deltaX < 0) {
+            // 오른쪽 -> 왼쪽 스와이프: 다음 단위 이동
+            goToNext();
+            showToast('👉 다음 일정으로 이동했습니다.');
+          } else {
+            // 왼쪽 -> 오른쪽 스와이프: 이전 단위 이동
+            goToPrev();
+            showToast('👈 이전 일정으로 이동했습니다.');
+          }
+        }
+      }
+    }, { passive: true });
+
+    /* =========================================================
+       9. 인쇄 및 PDF 출력
+       ========================================================= */
+    function updatePrintHeader() {
+      const dateDisplay = document.getElementById('currentDateDisplay').textContent;
+      const viewKorean = currentView === 'month' ? '월간' : currentView === 'week' ? '주간' : '일간';
+      document.getElementById('printDateText').textContent = `${dateDisplay} [${viewKorean} 캘린더]`;
+    }
+
+    document.getElementById('printBtn').addEventListener('click', () => {
+      updatePrintHeader();
+      window.print();
+    });
+
+    window.addEventListener('beforeprint', updatePrintHeader);
+
+    // URL 해시 변경 실시간 감지
+    window.addEventListener('hashchange', () => {
+      loadInitialEvents();
+      renderMainView();
+    });
+
+    /* =========================================================
+       10. 앱 시작
+       ========================================================= */
+    loadInitialEvents();
+    renderMainView();
+  </script>
+</body>
+</html>
